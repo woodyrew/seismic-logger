@@ -1,7 +1,7 @@
 # Dependancies
 
-[NodeJS](https://nodejs.org/)
-[couchDB](http://couchdb.apache.org/)
+- [NodeJS](https://nodejs.org/)
+- [couchDB](http://couchdb.apache.org/)
 
 
 # What does it do?
