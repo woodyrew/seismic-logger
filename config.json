@@ -1,0 +1,12 @@
+{
+	"my_location": {
+		"latitude": -36.8055690,
+		"longitude": -73.0252610,
+		"height": 17.51
+	},
+	"distance_accuracy": 100,
+	"store_within_km": 200,
+	"hash_salt": "seismic",
+	"couchDB_location": "http://127.0.0.1:5984/",
+	"db_name": "seismic"
+}
