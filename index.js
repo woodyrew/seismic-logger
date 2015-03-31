@@ -97,10 +97,52 @@ var add_if_not_exist = function add_if_not_exist (id, doc) {
 			});
 		}
 		else {
-			console.log('already exists');
+			console.log(config.db_name + '/' + id + ' already exists.');
 		}
 	});
 };
+
+var upsert_last_update = function upsert_last_update () {
+	var url = config.couchDB_location + config.db_name + '/last_update';
+	var options = {
+		"url": url,
+		"json": true,
+		"body": {
+			"time": moment().format("YYYY-MM-DD HH:mm:ss")
+		}
+	};
+	request.get(url, function (error, response, body) {
+		body = JSON.parse(body);
+		//console.log({"error": error, "status": response.statusCode, "message": body});
+		if (error) {
+			console.error(error);
+		}
+		else if (response.statusCode === 404) {
+			// Create new
+			request.put(options, function (error, response, body) {
+				if (error) {
+					console.error(error);
+				}
+				else {
+					console.log('Added last_update record with: ' + options.body.time);
+				}
+			});
+		}
+		else {
+			options.body._rev = body._rev;
+			// Update record
+			request.put(options, function (error, response, body) {
+				if (error) {
+					console.error(error);
+				}
+				else {
+					console.log('Updated last_update record with: ' + options.body.time);
+					//console.log({"error": error, "status": response.statusCode, "message": body});
+				}
+			});
+		}
+	});
+}
 
 /**
  * Gets and processes the seismic data from the source website
@@ -108,12 +150,14 @@ var add_if_not_exist = function add_if_not_exist (id, doc) {
  * @return {void}
  */
 var process_seismic_data = function get_seismic_data () {
+	console.log('Starting Scrape');
 	xray('http://www.sismologia.cl/links/ultimos_sismos.html')
 	.select([{
 		$root: 'table tr',
 		columns: ['td']
 	}])
 	.run(function (err, seismic) {
+		console.log('Processing Scrape');
 		seismic.forEach(function(element, index){
 			if (element.columns && element.columns.length) {
 				var local_moment;
@@ -146,6 +190,8 @@ var process_seismic_data = function get_seismic_data () {
 				}
 			}
 		});
+		console.log('Finished Scrape');
+		upsert_last_update();
 	});
 
 };
